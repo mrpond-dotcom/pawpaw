@@ -1,6 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, Image, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, Image, View, Platform } from "react-native";
 import React from "react";
-import Icon from "react-native-vector-icons/Ionicons";
 
 const IconButton = ({ onPress, text, iconName, imagePath }) => {
   return (
@@ -10,7 +9,6 @@ const IconButton = ({ onPress, text, iconName, imagePath }) => {
       style={styles.buttonContainer}
     >
       <Text style={styles.text}>{text}</Text>
-      {iconName && <Icon name={iconName} size={26} color="#FFFFFF" />}
       {imagePath && (
         <View style={styles.imageContainer}>
           <Image style={styles.image} source={imagePath} />

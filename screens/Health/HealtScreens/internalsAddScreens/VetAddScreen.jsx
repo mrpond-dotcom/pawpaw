@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import moment from "moment";
 import { addAnActivity } from "../../../../database/tables/activities";
 
-import { schedulePushNotification } from "../../../../utils/notifications";
+// import { schedulePushNotification } from "../../../../utils/notifications";
 
 const VetAddScreen = ({ navigation }) => {
   const currentPetId = useSelector((state) => state.myPet.currentPetId);
@@ -49,12 +49,12 @@ const VetAddScreen = ({ navigation }) => {
         addAnActivity(currentPetId, vetActivityData)
           .then((res) => {
             navigation.navigate("VetAppoitments");
-            schedulePushNotification(
-              `${petName} has a Vet Appointment`,
-              "Pssttt Vet Appointment is now...",
-              datui,
-              time
-            );
+            // schedulePushNotification(
+            //   `${petName} has a Vet Appointment`,
+            //   "Pssttt Vet Appointment is now...",
+            //   datui,
+            //   time
+            // );
           })
           .catch((err) => {
             console.log(err);

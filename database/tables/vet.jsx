@@ -1,61 +1,41 @@
-import { db } from "../database";
+import { getDb } from "../database";
 
-export const getAllVetbyPetId = (petId) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `select * from vet where petId = ?`,
-        [+petId],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const getAllVetbyPetId = async (petId) => {
+  try {
+    const db = await getDb();
+    const result = await db.getAllAsync(
+      `select * from vet where petId = ?`,
+      [+petId]
+    );
+    return result;
+  } catch (error) {
+    console.log("Get all vet by pet ID error:", error);
+    throw error;
+  }
 };
 
-export const addVet = (petId, date) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `insert into vet (
-                        petId,
-                        date
-                        ) values (?, ?)`,
-        [+petId, date],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const addVet = async (petId, date) => {
+  try {
+    const db = await getDb();
+    await db.runAsync(
+      `insert into vet (
+        petId,
+        date
+      ) values (?, ?)`,
+      [+petId, date]
+    );
+  } catch (error) {
+    console.log("Add vet error:", error);
+    throw error;
+  }
 };
 
-export const deleteAVet = (id) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `delete from vet where id = ?`,
-        [+id],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const deleteAVet = async (id) => {
+  try {
+    const db = await getDb();
+    await db.runAsync(`delete from vet where id = ?`, [+id]);
+  } catch (error) {
+    console.log("Delete a vet error:", error);
+    throw error;
+  }
 };

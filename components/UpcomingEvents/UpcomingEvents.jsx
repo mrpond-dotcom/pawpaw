@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import Icon from "react-native-vector-icons/Ionicons";
 import { useIsFocused } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import moment from "moment";
@@ -85,7 +84,7 @@ const UpcomingEvents = ({ navigation }) => {
         }}
       >
         <Text style={styles.upcomingHeaderText}>Upcoming Events</Text>
-        <Icon name="arrow-forward-outline" size={24} color="#222" />
+        <Text style={{ fontSize: 20 }}>→</Text>
       </TouchableOpacity>
       <LinearGradient
         style={styles.upcomingBox}

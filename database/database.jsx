@@ -1,212 +1,97 @@
 import * as SQLite from "expo-sqlite";
+import { Platform } from "react-native";
 
-export const db = SQLite.openDatabase("db.db");
+let db;
 
-export const dbInit = () => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `create table if not exists myPets (
-            id integer primary key not null, 
-            name text, 
-            spicie text,
-            photoURL text,
-            birthDate text,
-            breed text,
-            gender text,
-            weight text,
-            ownerName text
-            )`,
-        [],
-        () => {
-          //   resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        `create table if not exists activities (
-              id integer primary key not null,
-              petId integer,
-              activityType text,
-              date text,
-              note text,
-              startTime text,
-              endTime text,
-              calorie text,
-              meter text
-              )`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        `create table if not exists medical (
-              id integer primary key not null, 
-              petId integer,
-              date text,
-              startDate text,
-              endDate text,
-              medicalName text
-          )`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        `create table if not exists vaccine (
-                      id integer primary key not null, 
-                      petId integer,
-                      date text,
-                      vaccineName text
-                      )`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        `create table if not exists vet (
-              id integer primary key not null, 
-              petId integer,
-              date text
-              )`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        `create table if not exists weight (
-          id integer primary key not null, 
-          petId integer,
-          date text,
-          weight text
-          )`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-    resolve();
-  });
-
-  return promise;
+export const getDb = async () => {
+  if (Platform.OS === "web") {
+    throw new Error("SQLite is not supported on web platform");
+  }
+  
+  if (!db) {
+    db = await SQLite.openDatabaseAsync("db.db");
+  }
+  return db;
 };
 
-export const dropDatabase = () => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `drop table myPets`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
+export const dbInit = async () => {
+  const database = await getDb();
+  
+  try {
+    await database.execAsync(`
+      create table if not exists myPets (
+        id integer primary key not null, 
+        name text, 
+        spicie text,
+        photoURL text,
+        birthDate text,
+        breed text,
+        gender text,
+        weight text,
+        ownerName text
       );
 
-      tx.executeSql(
-        `drop table activities`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
+      create table if not exists activities (
+        id integer primary key not null,
+        petId integer,
+        activityType text,
+        date text,
+        note text,
+        startTime text,
+        endTime text,
+        calorie text,
+        meter text
       );
-      tx.executeSql(
-        `drop table medical`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-      tx.executeSql(
-        `drop table vaccine`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-      tx.executeSql(
-        `drop table vet`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-      tx.executeSql(
-        `drop table weight`,
-        [],
-        () => {
-          // resolve();
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-    resolve();
-  });
 
-  return promise;
+      create table if not exists medical (
+        id integer primary key not null, 
+        petId integer,
+        date text,
+        startDate text,
+        endDate text,
+        medicalName text
+      );
+
+      create table if not exists vaccine (
+        id integer primary key not null, 
+        petId integer,
+        date text,
+        vaccineName text
+      );
+
+      create table if not exists vet (
+        id integer primary key not null, 
+        petId integer,
+        date text
+      );
+
+      create table if not exists weight (
+        id integer primary key not null, 
+        petId integer,
+        date text,
+        weight text
+      );
+    `);
+  } catch (error) {
+    console.log("Database initialization error:", error);
+    throw error;
+  }
+};
+
+export const dropDatabase = async () => {
+  const database = await getDb();
+  
+  try {
+    await database.execAsync(`
+      drop table if exists myPets;
+      drop table if exists activities;
+      drop table if exists medical;
+      drop table if exists vaccine;
+      drop table if exists vet;
+      drop table if exists weight;
+    `);
+  } catch (error) {
+    console.log("Drop database error:", error);
+    throw error;
+  }
 };

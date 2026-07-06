@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, Dimensions } from "react-native";
+import { StyleSheet, Text, View, Image, Dimensions, Platform } from "react-native";
 import React, { useEffect } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import image from "../../../assets/images/welcome-1.png";

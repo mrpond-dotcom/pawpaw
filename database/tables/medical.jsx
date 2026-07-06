@@ -1,65 +1,45 @@
-import { db } from "../database";
+import { getDb } from "../database";
 
 
-export const getAllMedicalbyPetId = (petId) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `select * from medical where petId = ?`,
-        [+petId],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const getAllMedicalbyPetId = async (petId) => {
+  try {
+    const db = await getDb();
+    const result = await db.getAllAsync(
+      `select * from medical where petId = ?`,
+      [+petId]
+    );
+    return result;
+  } catch (error) {
+    console.log("Get all medical by pet ID error:", error);
+    throw error;
+  }
 };
 
-export const addAMedical = (petId, medicalName, date, startDate, endDate) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `insert into medical (
-                petId,
-                date, 
-                medicalName,
-                startDate,
-                endDate
-            ) values (?, ?, ?, ?, ?)`,
-        [+petId, date, medicalName, startDate, endDate],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const addAMedical = async (petId, medicalName, date, startDate, endDate) => {
+  try {
+    const db = await getDb();
+    await db.runAsync(
+      `insert into medical (
+        petId,
+        date, 
+        medicalName,
+        startDate,
+        endDate
+      ) values (?, ?, ?, ?, ?)`,
+      [+petId, date, medicalName, startDate, endDate]
+    );
+  } catch (error) {
+    console.log("Add a medical error:", error);
+    throw error;
+  }
 };
 
-export const deleteAMedical = (id) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `delete from medical where id = ?`,
-        [+id],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const deleteAMedical = async (id) => {
+  try {
+    const db = await getDb();
+    await db.runAsync(`delete from medical where id = ?`, [+id]);
+  } catch (error) {
+    console.log("Delete a medical error:", error);
+    throw error;
+  }
 };

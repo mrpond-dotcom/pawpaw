@@ -18,13 +18,14 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useDispatch, useSelector } from "react-redux";
 import { setGenderBreedWeight } from "../../../redux/slice/myPetSlice";
 
-const PetInfoSecond = ({ navigation }) => {
+const PetInfoSecond = ({ navigation, route }) => {
   const [gender, setGender] = useState("");
   const [breed, setBreed] = useState("");
   const [weight, setWeight] = useState("");
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const currentPetInfo = useSelector((state) => state.myPet.currentPetInfo);
+  const isEditing = route?.params?.isEditing || false;
 
   const ownerPageHandler = () => {
     if (gender === "") {
@@ -50,7 +51,11 @@ const PetInfoSecond = ({ navigation }) => {
     dispatch(
       setGenderBreedWeight({ gender: gender, breed: breedTrim, weight: weight })
     );
-    navigation.navigate("Owner");
+    if (isEditing) {
+      navigation.navigate("Owner", { isEditing: true });
+    } else {
+      navigation.navigate("Owner");
+    }
   };
 
   useEffect(() => {
@@ -122,9 +127,9 @@ const PetInfoSecond = ({ navigation }) => {
         onChange={weightHandler}
         value={weight}
       />
-      <View style={styles.buttonContainer}>
-        <Button text="Next" onPress={ownerPageHandler} />
-      </View>
+       <View style={styles.buttonContainer}>
+         <Button text={isEditing ? "Update" : "Next"} onPress={ownerPageHandler} />
+       </View>
     </KeyboardAwareScrollView>
   );
 };

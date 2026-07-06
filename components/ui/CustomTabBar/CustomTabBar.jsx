@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Pressable,
+  Platform,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
@@ -40,55 +40,33 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           });
         };
 
-        return (
-          <TouchableOpacity
-            key={index}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={options.tabBarTestID}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={isFocused ? styles.activeButton : styles.button}
-          >
+         return (
+           <TouchableOpacity
+             key={route.key}
+             activeOpacity={0.7}
+             accessibilityRole="button"
+             accessibilityState={isFocused ? { selected: true } : {}}
+             accessibilityLabel={options.tabBarAccessibilityLabel}
+             testID={options.tabBarTestID}
+             onPress={onPress}
+             onLongPress={onLongPress}
+             style={isFocused ? styles.activeButton : styles.button}
+           >
             <View style={styles.icon}>
-              {label === "My Pet" ? (
-                <Icon
-                  name={isFocused ? "paw" : "paw-outline"}
-                  size={25}
-                  color={isFocused ? "#EE7942" : "#222"}
-                />
-              ) : label === "Activities" ? (
-                <Icon
-                  name={isFocused ? "time" : "time-outline"}
-                  size={25}
-                  color={isFocused ? "#EE7942" : "#222"}
-                />
-              ) : label === "Health" ? (
-                <Icon
-                  name={isFocused ? "fitness" : "fitness-outline"}
-                  size={25}
-                  color={isFocused ? "#EE7942" : "#222"}
-                />
-              ) : label === "Menu" ? (
-                <Icon
-                  name={isFocused ? "grid" : "grid-outline"}
-                  size={25}
-                  color={isFocused ? "#EE7942" : "#222"}
-                />
-              ) : null}
-            </View>
-            {isFocused && (
-              <Text
-                style={{
-                  color: isFocused ? "#EE7942" : "#222",
-                  fontWeight: "bold",
-                }}
-              >
-                {label}
+              <Text style={{ fontSize: 20, color: isFocused ? "#EE7942" : "#222" }}>
+                {label === "My Pet" ? "🐾" : label === "Activities" ? "⏱️" : label === "Health" ? "💪" : label === "Menu" ? "☰" : ""}
               </Text>
-            )}
+            </View>
+            <Text
+              style={{
+                color: isFocused ? "#EE7942" : "#222",
+                fontWeight: isFocused ? "bold" : "normal",
+                fontSize: 11,
+                marginTop: 2,
+              }}
+            >
+              {label}
+            </Text>
           </TouchableOpacity>
         );
       })}
@@ -118,12 +96,14 @@ const styles = StyleSheet.create({
     paddingVertical: Platform.OS === "android" ? 10 : 11,
     paddingBottom: Platform.OS === "android" ? 1 : 21,
   },
-  button: {
+   button: {
     flex: 1,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     height: 55,
+    borderRadius: 10,
+    marginHorizontal: 5,
   },
   activeButton: {
     flex: 1,
@@ -133,6 +113,13 @@ const styles = StyleSheet.create({
     height: 55,
     borderRadius: 10,
     backgroundColor: "#FEE8DC",
+    marginHorizontal: 5,
+  },
+  icon: {
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

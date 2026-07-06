@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Platform,
   Text,
@@ -12,20 +12,65 @@ import {
 import Input from "../../../components/ui/Input/Input";
 import { useIsFocused } from "@react-navigation/native";
 import * as Location from "expo-location";
-import Icons from "react-native-vector-icons/Ionicons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import walk from "../../../assets/activityImages/walk.png";
 import cat3 from "../../../assets/activityImages/cat/cat--3.png";
 import * as TaskManager from "expo-task-manager";
 import { getDistance, getPreciseDistance } from "geolib";
-import { Stopwatch, Timer } from "react-native-stopwatch-timer";
 import Button from "../../../components/ui/Button/Button";
 import ClockPicker from "../../../components/ui/ClockPicker/ClockPicker";
 import MultiLineInput from "../../../components/ui/MultilineInput/MultiLineInput";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { addAnActivity } from "../../../database/tables/activities";
-import { schedulePushNotification } from "../../../utils/notifications";
+// import { schedulePushNotification } from "../../../utils/notifications";
+
+// Custom Stopwatch Component
+const CustomStopwatch = ({ start, reset, options }) => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (start) {
+      intervalRef.current = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [start]);
+
+  useEffect(() => {
+    if (reset) {
+      setElapsedTime(0);
+    }
+  }, [reset]);
+
+  const formatTime = (seconds) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hrs).padStart(2, "0")}:${String(mins).padStart(
+      2,
+      "0"
+    )}:${String(secs).padStart(2, "0")}`;
+  };
+
+  return (
+    <View style={options?.container || styles.stopwatchContainer}>
+      <Text style={options?.text || styles.stopwatchText}>
+        {formatTime(elapsedTime)}
+      </Text>
+    </View>
+  );
+};
 
 const LOCATION_TASK_NAME = "LOCATION_TASK_NAME";
 let foregroundSubscription = null;
@@ -146,22 +191,26 @@ const Walk = ({ navigation }) => {
     setPosition(null);
   };
 
-  useEffect(() => {
-    // get todays date
-    LogBox.ignoreLogs([
-      "Animated: `useNativeDriver`",
-      "componentWillReceiveProps",
-    ]);
-    const todayDate = moment(new Date()).format("YYYY-MM-DD");
-    const selectedDateString = moment(selectedDate).format("YYYY-MM-DD");
-    if (isFocused) {
-      if (selectedDateString === todayDate) {
-        setIsScheduled(false);
-      } else {
-        setIsScheduled(true);
-      }
-    }
-  }, [isFocused, currentPetId]);
+   useEffect(() => {
+     // get todays date
+     LogBox.ignoreLogs([
+       "Animated: `useNativeDriver`",
+       "componentWillReceiveProps",
+       "Non-serializable values were found",
+     ]);
+   }, []);
+
+   useEffect(() => {
+     const todayDate = moment(new Date()).format("YYYY-MM-DD");
+     const selectedDateString = moment(selectedDate).format("YYYY-MM-DD");
+     if (isFocused) {
+       if (selectedDateString === todayDate) {
+         setIsScheduled(false);
+       } else {
+         setIsScheduled(true);
+       }
+     }
+   }, [isFocused, selectedDate]);
 
   const walkSubmitHandler = () => {
     if (liveMeters.distance === 0) {
@@ -209,12 +258,12 @@ const Walk = ({ navigation }) => {
     addAnActivity(currentPetId, walkActivity)
       .then(() => {
         navigation.navigate("ActivitiesMain");
-        schedulePushNotification(
-          `${petName} has a Walk Activity`,
-          `Pssttt ${petName} has a walk activity now...`,
-          datui,
-          time ? time : timeFormattedForWalk
-        );
+        // schedulePushNotification(
+        //   `${petName} has a Walk Activity`,
+        //   `Pssttt ${petName} has a walk activity now...`,
+        //   datui,
+        //   time ? time : timeFormattedForWalk
+        // );
       })
       .catch((err) => {
         console.log(err);
@@ -297,14 +346,10 @@ const Walk = ({ navigation }) => {
               <Text style={styles.meterFix}>m</Text>
             </View>
             <View style={styles.sectionStyle}>
-              <Stopwatch
-                laps
+              <CustomStopwatch
                 start={isStopwatchStart}
                 reset={resetStopwatch}
                 options={options}
-                getTime={(time) => {
-                  // console.log(time);
-                }}
               />
               <View style={styles.buttonContainer}>
                 <TouchableOpacity

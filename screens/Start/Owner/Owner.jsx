@@ -22,30 +22,33 @@ import {
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { addWeight } from "../../../database/tables/weight";
-import { addAPet } from "../../../database/tables/myPet";
+import { addAPet, updateAPet } from "../../../database/tables/myPet";
 
-const Owner = ({ navigation }) => {
+const Owner = ({ navigation, route }) => {
   const [owner, setOwner] = useState("");
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const currentPetInfo = useSelector((state) => state.myPet.currentPetInfo);
   const myPets = useSelector((state) => state.myPet.myPets);
   const [isLoading, setIsLoading] = useState(false);
+  const isEditing = route?.params?.isEditing || false;
 
   const pressHandler = () => {
-    if (owner === "") {
-      return Alert.alert("oops...", "Please enter your name");
+    if (myPets.length === 0) {
+      if (owner === "") {
+        return Alert.alert("oops...", "Please enter your name");
+      }
+      if (owner.length > 20 || owner.length < 4) {
+        return Alert.alert(
+          "oops...",
+          "Please enter your name(max 20 chracter and min 4)"
+        );
+      }
+      if (/\d/.test(owner)) {
+        return Alert.alert("oops...", "Please enter your name without number");
+      }
     }
-    if (owner.length > 20 || owner.length < 4) {
-      return Alert.alert(
-        "oops...",
-        "Please enter your name(max 20 chracter and min 4)"
-      );
-    }
-    if (/\d/.test(owner)) {
-      return Alert.alert("oops...", "Please enter your name without number");
-    }
-    let ownerTrim = owner.trim();
+    let ownerTrim = myPets.length > 0 ? myPets[0].ownerName : owner.trim();
 
     dispatch(setOwnerName(ownerTrim));
 
@@ -60,48 +63,72 @@ const Owner = ({ navigation }) => {
       weight: currentPetInfo.weight,
     };
 
-    if (myPets.length === 2) {
+    if (myPets.length === 2 && !isEditing) {
       return navigation.navigate("bottomNavStack", {
         screen: "My Pet",
       });
     }
     setIsLoading(true);
-    addAPet(pet)
-      .then((res) => {
-        dispatch(
-          setId({
-            id: res,
-            data: pet,
-          })
-        );
-        const newPushPetData = {
-          id: res,
-          birthDate: currentPetInfo.birthDate,
-          breed: currentPetInfo.breed,
-          gender: currentPetInfo.gender,
-          name: currentPetInfo.name,
-          ownerName: ownerTrim,
-          photoURL: currentPetInfo.photoURL,
-          spicie: currentPetInfo.spicie,
-          weight: currentPetInfo.weight,
-        };
-        dispatch(addNewMyPets(newPushPetData));
-        const dates = moment().format("YYYY-MM-DD");
-        const time = moment().format("HH:mm:ss");
-        const formattedDateString = dates + "T" + time;
-        addWeight(res, parseFloat(currentPetInfo.weight), formattedDateString)
-          .then(() => {})
-          .catch((err) => {
-            console.log(err);
+
+    if (isEditing && currentPetInfo.id) {
+      // Update existing pet
+      updateAPet(currentPetInfo.id, pet)
+        .then(() => {
+          dispatch(
+            setId({
+              id: currentPetInfo.id,
+              data: pet,
+            })
+          );
+          navigation.navigate("bottomNavStack", {
+            screen: "My Pet",
           });
-        navigation.navigate("bottomNavStack", {
-          screen: "My Pet",
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setIsLoading(false);
         });
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    } else {
+      // Add new pet
+      addAPet(pet)
+        .then((res) => {
+          dispatch(
+            setId({
+              id: res,
+              data: pet,
+            })
+          );
+          const newPushPetData = {
+            id: res,
+            birthDate: currentPetInfo.birthDate,
+            breed: currentPetInfo.breed,
+            gender: currentPetInfo.gender,
+            name: currentPetInfo.name,
+            ownerName: ownerTrim,
+            photoURL: currentPetInfo.photoURL,
+            spicie: currentPetInfo.spicie,
+            weight: currentPetInfo.weight,
+          };
+          dispatch(addNewMyPets(newPushPetData));
+          const dates = moment().format("YYYY-MM-DD");
+          const time = moment().format("HH:mm:ss");
+          const formattedDateString = dates + "T" + time;
+          addWeight(res, parseFloat(currentPetInfo.weight), formattedDateString)
+            .then(() => {})
+            .catch((err) => {
+              console.log(err);
+            });
+          navigation.navigate("bottomNavStack", {
+            screen: "My Pet",
+          });
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setIsLoading(false);
+        });
+    }
   };
 
   const ownerHandler = (owner) => {
@@ -131,7 +158,11 @@ const Owner = ({ navigation }) => {
             },
           ]}
         ></View>
-        <Text style={styles.headerText}>Please Fill Your Info</Text>
+        <Text style={styles.headerText}>
+          {myPets.length > 0
+            ? "Add Pet Information"
+            : "Please Fill Your Info"}
+        </Text>
         <View
           style={[
             styles.imageContainer,
@@ -148,19 +179,21 @@ const Owner = ({ navigation }) => {
             source={currentPetInfo.spicie === "dog" ? image : cat6}
           />
         </View>
-        <View style={styles.inputContainer}>
-          <Input
-            placeholder="Your Name and Surname"
-            type="default"
-            label="Name Surname"
-            onChange={ownerHandler}
-            value={owner}
-          />
-        </View>
+        {myPets.length === 0 && (
+          <View style={styles.inputContainer}>
+            <Input
+              placeholder="Your Name and Surname"
+              type="default"
+              label="Name Surname"
+              onChange={ownerHandler}
+              value={owner}
+            />
+          </View>
+        )}
 
-        <View style={styles.buttonContainer}>
-          <Button text="Finish" onPress={pressHandler} disabled={isLoading} />
-        </View>
+         <View style={styles.buttonContainer}>
+           <Button text={isEditing ? "Update Pet" : "Finish"} onPress={pressHandler} disabled={isLoading} />
+         </View>
       </View>
       {isLoading && (
         <View style={[styles.loading]}>

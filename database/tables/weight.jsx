@@ -1,83 +1,58 @@
-import { db } from "../database";
+import { getDb } from "../database";
 
-export const getAllWeightbyPetId = (petId) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `select * from weight where petId = ?`,
-        [+petId],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const getAllWeightbyPetId = async (petId) => {
+  try {
+    const db = await getDb();
+    const result = await db.getAllAsync(
+      `select * from weight where petId = ?`,
+      [+petId]
+    );
+    return result;
+  } catch (error) {
+    console.log("Get all weight by pet ID error:", error);
+    throw error;
+  }
 };
 
-export const getAllWeightForADate = (petId) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `select * from weight where petId = ?`,
-        [+petId],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const getAllWeightForADate = async (petId) => {
+  try {
+    const db = await getDb();
+    const result = await db.getAllAsync(
+      `select * from weight where petId = ?`,
+      [+petId]
+    );
+    return result;
+  } catch (error) {
+    console.log("Get all weight for a date error:", error);
+    throw error;
+  }
 };
 
-export const addWeight = (petId, weight, date) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `insert into weight (
-                        petId,
-                        date, 
-                        weight
-                        ) values (?, ?, ?)`,
-        [+petId, date, weight],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
+export const addWeight = async (petId, weight, date) => {
+  try {
+    const db = await getDb();
+    await db.runAsync(
+      `insert into weight (
+        petId,
+        date, 
+        weight
+      ) values (?, ?, ?)`,
+      [+petId, date, weight]
+    );
+  } catch (error) {
+    console.log("Add weight error:", error);
+    throw error;
+  }
 };
 
-export const deleteAWeight = (id) => {
-  const promise = new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `delete from weight where id = ?`,
-        [+id],
-        (_, { rows }) => {
-          resolve(rows._array);
-        },
-        (_, err) => {
-          console.log(err);
-          reject(err);
-        }
-      );
-    });
-  });
-  return promise;
-}
+export const deleteAWeight = async (id) => {
+  try {
+    const db = await getDb();
+    await db.runAsync(`delete from weight where id = ?`, [+id]);
+  } catch (error) {
+    console.log("Delete a weight error:", error);
+    throw error;
+  }
+};
 
 

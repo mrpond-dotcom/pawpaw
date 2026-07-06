@@ -14,11 +14,12 @@ import Button from "../../../components/ui/Button/Button";
 import { setPetSpicie } from "../../../redux/slice/myPetSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-const PetSpicie = ({ navigation }) => {
+const PetSpicie = ({ navigation, route }) => {
   const [spicie, setSpice] = React.useState("");
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const currentPetInfo = useSelector((state) => state.myPet.currentPetInfo);
+  const isEditing = route?.params?.isEditing || false;
 
   useEffect(() => {
     if (isFocused) {
@@ -31,7 +32,11 @@ const PetSpicie = ({ navigation }) => {
       return Alert.alert("oops...", "Please select a spicie");
     }
     dispatch(setPetSpicie(spicie));
-    navigation.navigate("PetInfoFirst");
+    if (isEditing) {
+      navigation.navigate("PetInfoSecond");
+    } else {
+      navigation.navigate("PetInfoFirst");
+    }
   };
 
   return (
@@ -87,9 +92,9 @@ const PetSpicie = ({ navigation }) => {
         <Text style={styles.spicieText}>Fish</Text>
         <Text style={styles.spicieText}>Reptile</Text> */}
       </View>
-      <View style={styles.buttonContainer}>
-        <Button text="Next" onPress={petInfoFirstHandler} />
-      </View>
+       <View style={styles.buttonContainer}>
+         <Button text={isEditing ? "Update" : "Next"} onPress={petInfoFirstHandler} />
+       </View>
     </View>
   );
 };

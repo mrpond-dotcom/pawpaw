@@ -11,7 +11,6 @@ import {
 import React, { useEffect, useState, useRef } from "react";
 import profile from "../../assets/images/profile.png";
 import petImage from "../../assets/images/dog-ex.png";
-import Icon from "react-native-vector-icons/Ionicons";
 import driveImage from "../../assets/images/drive.png";
 import { useSelector, useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
@@ -66,9 +65,24 @@ const Menu = ({ navigation }) => {
   };
 
   const petDeleteHandler = (id) => {
+    if (myPets.length === 1) {
+      Alert.alert(
+        "Ohoii Boiiii",
+        "You must have at least one pet. Cannot delete the last pet!",
+        [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]
+      );
+      return;
+    }
+
+    const petToDelete = myPets.find((pet) => pet.id === id);
     Alert.alert(
       "Ohoii Boiiii",
-      `You are about to delete ${currentPetInfo.name}. 
+      `You are about to delete ${petToDelete?.name}. 
         Are you sure?`,
       [
         {
@@ -80,18 +94,11 @@ const Menu = ({ navigation }) => {
           onPress: () => {
             deleteAPet(id)
               .then(() => {
-                if (myPets.length === 2) {
-                  const otherPet = myPets.find((pet) => pet.id !== id);
-                  dispatch(setPetData(otherPet));
-                  dispatch(removePetFromMyPetArray(id));
-                  navigation.navigate("bottomNavStack", {
-                    screen: "My Pet",
-                  });
-                } else {
-                  dispatch(resetEverything());
-                  navigation.navigate("startStack", {
-                    screen: "Welcome",
-                  });
+                const remainingPets = myPets.filter((pet) => pet.id !== id);
+                dispatch(removePetFromMyPetArray(id));
+                
+                if (currentPetId === id && remainingPets.length > 0) {
+                  dispatch(setPetData(remainingPets[0]));
                 }
               })
               .catch((err) => {
@@ -154,6 +161,7 @@ const Menu = ({ navigation }) => {
         </View>
         <Text style={styles.profileText}>{currentPetInfo.ownerName}</Text>
       </View>
+
       <View style={styles.petControlContainer}>
         {myPets.map((pet, index) => {
           return (
@@ -194,6 +202,23 @@ const Menu = ({ navigation }) => {
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   activeOpacity={0.8}
+                  style={styles.editButton}
+                  onPress={() => {
+                    dispatch(resetCurrentPetInfo());
+                    dispatch(setPetData(pet));
+                    navigation.navigate("startStack", {
+                      screen: "PetSpecie",
+                      params: {
+                        hasBack: true,
+                        isEditing: true,
+                      },
+                    });
+                  }}
+                >
+                  <Text style={styles.buttonText}>EDIT</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.8}
                   style={styles.deleteButton}
                   onPress={() => {
                     petDeleteHandler(pet.id);
@@ -205,22 +230,20 @@ const Menu = ({ navigation }) => {
             </View>
           );
         })}
-        {myPets.length === 1 && (
-          <TouchableOpacity
-            activeOpacity={0.5}
-            style={styles.pet}
-            onPress={addNewPet}
-          >
-            <View style={styles.petImageContainer}>
-              <View style={styles.emptypetImage}>
-                <Icon name={"add-circle-outline"} size={55} color={"#EAEFF5"} />
-              </View>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          style={styles.pet}
+          onPress={addNewPet}
+        >
+          <View style={styles.petImageContainer}>
+            <View style={styles.emptypetImage}>
+              <Text style={styles.addPetEmoji}>➕</Text>
             </View>
-            <View style={styles.petInfoContainer}>
-              <Text style={styles.petAge}>Add New Pet</Text>
-            </View>
-          </TouchableOpacity>
-        )}
+          </View>
+          <View style={styles.petInfoContainer}>
+            <Text style={styles.petAge}>Add New Pet</Text>
+          </View>
+        </TouchableOpacity>
       </View>
       <View style={styles.bottomButtonContainers}>
         {/* <TouchableOpacity
@@ -279,6 +302,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+  petSwitcherContainer: {
+    paddingHorizontal: 12,
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  petSwitcher: {
+    flexDirection: "row",
+  },
+  petSwitcherCard: {
+    width: 90,
+    height: 120,
+    marginRight: 12,
+    borderRadius: 10,
+    backgroundColor: "#F8FAFD",
+    borderWidth: 2,
+    borderColor: "#E7ECF3",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 8,
+  },
+  petSwitcherCardActive: {
+    backgroundColor: "#FEE8DC",
+    borderColor: "#EE7942",
+  },
+  petSwitcherImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 6,
+    overflow: "hidden",
+  },
+  petSwitcherImage: {
+    flex: 1,
+    width: null,
+    height: null,
+    resizeMode: "contain",
+  },
+  petSwitcherName: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#434343",
+    textAlign: "center",
+  },
   abotUsContainer: {
     flexDirection: "column",
     width: "100%",
@@ -303,7 +369,7 @@ const styles = StyleSheet.create({
   },
   profileContainer: {
     paddingHorizontal: 12,
-    marginTop: 0,
+    marginTop: 30,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 12,
@@ -334,12 +400,15 @@ const styles = StyleSheet.create({
   petControlContainer: {
     paddingHorizontal: 12,
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    flexWrap: "wrap",
+    marginTop: 10,
+    marginBottom: 20,
   },
   pet: {
     height: 200,
-    width: "45%",
+    width: "48%",
     borderColor: "#EAEFF5",
     borderWidth: 2,
     borderRadius: 10,
@@ -347,6 +416,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "space-evenly",
     alignItems: "center",
+    marginBottom: 15,
   },
   petImageContainer: {
     height: 80,
@@ -386,6 +456,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 5,
+  },
+  editButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "#707BFB",
+    marginRight: 8,
   },
   deleteButton: {
     paddingHorizontal: 15,
@@ -479,5 +556,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#FFFFFF",
     fontWeight: "600",
+  },
+  addPetEmoji: {
+    fontSize: 50,
   },
 });

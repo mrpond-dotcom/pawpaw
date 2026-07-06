@@ -1,14 +1,15 @@
-import { StyleSheet, Text, View, FlatList } from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 import DetailListItem from "./DetailListItem";
 import { useSelector } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import { getActivitiesForADate } from "../../../database/tables/activities";
-import Icons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 
 const DetailListContainer = () => {
   const [data, setData] = useState([]);
   const isFocused = useIsFocused();
+  const navigation = useNavigation();
   const selectedDate = useSelector(
     (state) => state.myPet.calender.selectedDate
   );
@@ -57,8 +58,19 @@ const DetailListContainer = () => {
         />
       ) : (
         <View style={styles.empty}>
-          <Icons name="sad-outline" size={40} color="#A2AEBE" />
+          <TouchableOpacity
+            style={styles.addActivityButton}
+            activeOpacity={0.7}
+            onPress={() => {
+              navigation.navigate("Activities", {
+                screen: "NewActivity",
+              });
+            }}
+          >
+            <Text style={styles.addButtonText}>➕</Text>
+          </TouchableOpacity>
           <Text style={styles.emptyText}>No activities for this day</Text>
+          <Text style={styles.tapText}>Tap + to add new activity</Text>
         </View>
       )}
     </View>
@@ -86,5 +98,31 @@ const styles = StyleSheet.create({
     color: "#A2AEBE",
     marginTop: 10,
     fontWeight: "600",
+  },
+  addActivityButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#707BFB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  addButtonText: {
+    fontSize: 40,
+  },
+  tapText: {
+    fontSize: 12,
+    color: "#A2AEBE",
+    marginTop: 10,
+    fontStyle: "italic",
   },
 });

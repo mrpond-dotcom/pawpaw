@@ -1,6 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import Icon from "react-native-vector-icons/Ionicons";
 const Button = ({ onPress, text, ...props }) => {
   return (
     <TouchableOpacity
@@ -11,7 +10,7 @@ const Button = ({ onPress, text, ...props }) => {
     >
       <Text style={styles.text}>{text}</Text>
       {text === "Next" && (
-        <Icon name="chevron-forward-outline" size={26} color="#FFFFFF" />
+        <Text style={styles.chevron}>→</Text>
       )}
     </TouchableOpacity>
   );
@@ -36,5 +35,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 10,
     fontWeight: "bold",
+  },
+  chevron: {
+    color: "#FFFFFF",
+    fontSize: 26,
+    marginLeft: 8,
   },
 });

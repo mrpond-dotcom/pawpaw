@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Platform } from "react-native";
 import React from "react";
 import dog from "../../../assets/images/dog-ex.png";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,14 +9,16 @@ import dogImage from "../../../assets/emptyPetImages/dog.png";
 
 import { setId } from "../../../redux/slice/myPetSlice";
 
-export const CustomMainHeaderLeft = ({ isNameVisible }) => {
+export const CustomMainHeaderLeft = ({ isNameVisible, onShowPetSwitcher }) => {
   const dispatch = useDispatch();
   const currentPetInfo = useSelector((state) => state.myPet.currentPetInfo);
   const myPets = useSelector((state) => state.myPet.myPets);
   const currentPetId = useSelector((state) => state.myPet.currentPetId);
 
   const petChangeHandler = () => {
-    if (myPets.length === 2) {
+    if (myPets.length > 1) {
+      onShowPetSwitcher?.();
+    } else if (myPets.length === 2) {
       // swap the current pet
       dispatch(
         setId({
@@ -62,16 +64,10 @@ export const CustomMainHeaderRight = ({ navigation }) => {
   const date = new Date().toISOString();
   const currentDate = moment(date).format("YYYY-MM-DDTHH:mm:ss");
   const dispatch = useDispatch();
+  const currentPetInfo = useSelector((state) => state.myPet.currentPetInfo);
 
   const pressHandler = () => {
     dispatch(setSelectedDate(currentDate));
-    //console.log(currentDate);
-
-    // navigation.navigate("ActivitiesMain", {
-    //   screen: "NewActivity",
-    // });
-
-    // "Activities", "NewActivity";
 
     navigation.navigate("Activities", {
       screen: "ActivitiesMain",
@@ -81,26 +77,49 @@ export const CustomMainHeaderRight = ({ navigation }) => {
     });
   };
 
+  const editPetHandler = () => {
+    navigation.navigate("startStack", {
+      screen: "PetSpecie",
+      params: {
+        hasBack: true,
+        isEditing: true,
+      },
+    });
+  };
+
+  const isMyPetScreen = navigation.getState()?.routes[navigation.getState().index]?.name === "My Pet";
+
   return (
     <View style={styles.rightContainer}>
-      <TouchableOpacity
-        style={styles.rightDateContainer}
-        activeOpacity={0.7}
-        onPress={pressHandler}
-      >
-        <Text style={styles.date}>{currentDayNumber}</Text>
-        <Text style={styles.day}>{currentDay}</Text>
-      </TouchableOpacity>
+      {!isMyPetScreen ? (
+        <>
+          <TouchableOpacity
+            style={styles.rightDateContainer}
+            activeOpacity={0.7}
+            onPress={editPetHandler}
+          >
+            <Text style={styles.editIcon}>✏️</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.rightDateContainer}
+            activeOpacity={0.7}
+            onPress={pressHandler}
+          >
+            <Text style={styles.addIcon}>➕</Text>
+          </TouchableOpacity>
+        </>
+      ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  rightContainer: {
+   rightContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
+    paddingRight: 10,
   },
   rightDateContainer: {
     right: 20,
@@ -120,6 +139,28 @@ const styles = StyleSheet.create({
   day: {
     color: "#9CA9B9",
     fontSize: 13,
+  },
+   addIcon: {
+    fontSize: 28,
+  },
+  editIcon: {
+    fontSize: 24,
+  },
+  petSwitcherHeaderButton: {
+    width: 55,
+    height: 55,
+    borderRadius: 27.5,
+    borderWidth: 2,
+    borderColor: "#EAEFF5",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  petSwitcherHeaderImage: {
+    flex: 1,
+    width: null,
+    height: null,
+    resizeMode: "contain",
   },
   leftContainer: {
     flex: 1,

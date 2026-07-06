@@ -27,9 +27,9 @@ const myPetSlice = createSlice({
   initialState,
   reducers: {
     setId: (state, action) => {
-      state.currentPetInfo = action.payload.data;
+      const petData = { ...action.payload.data };
+      state.currentPetInfo = petData;
       state.currentPetId = action.payload.id;
-      state.currentPetInfo.id = action.payload.id;
     },
     setPetSpicie: (state, action) => {
       state.currentPetInfo.spicie = action.payload;

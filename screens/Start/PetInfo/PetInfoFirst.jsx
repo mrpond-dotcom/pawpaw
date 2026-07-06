@@ -46,28 +46,33 @@ const PetInfoFirst = ({ navigation }) => {
     } else if (birthDate === "") {
       return Alert.alert("oops...", "Please enter your pet's birth date");
     }
-    const onlyDate = birthDate.split(" ");
-    const time = onlyDate[1] + ":00";
-    // if (time === "00:00:00") {
-    //   return Alert.alert("oops...", "Please select a timeother than 00:00:00");
-    // }
-    const datui = new Date(onlyDate[0]);
-    const dates = moment(datui).format("YYYY-MM-DD");
+    
+    // Parse birthDate in format "YYYY/MM/DD HH:mm"
+    const parsedDate = moment(birthDate, "YYYY/MM/DD HH:mm");
+    if (!parsedDate.isValid()) {
+      return Alert.alert("oops...", "Invalid date format");
+    }
+    
+    const dates = parsedDate.format("YYYY-MM-DD");
+    const time = parsedDate.format("HH:mm:ss");
     const formattedDateString = dates + "T" + time;
-    const today = new Date().toISOString().split("T")[0];
-    if (dates > today) {
+    const today = moment().format("YYYY-MM-DD");
+    
+    if (parsedDate.isAfter(moment(), 'day')) {
       return Alert.alert(
         "oops...",
         "Please enter a birthDate that is not in the future"
       );
     }
-    const year = dates.split("-")[0];
+    
+    const year = parseInt(dates.split("-")[0]);
     if (year < 2010) {
       return Alert.alert(
         "oops...",
         "Please enter a birthDate that is not in the past"
       );
     }
+    
     let trimName = name.trim();
     dispatch(setpetNameAndBirthDate({ name: trimName, birthDate: birthDate }));
     navigation.navigate("PetInfoSecond");

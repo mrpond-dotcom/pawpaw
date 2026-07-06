@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import { getVetVaccinationByPetiD } from "../../database/tables/activities";
 import { useIsFocused } from "@react-navigation/native";

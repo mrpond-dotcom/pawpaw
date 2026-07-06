@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Dimensions } from "react-native";
+import { StyleSheet, Text, View, Dimensions, Platform } from "react-native";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import {
   Calendar,
@@ -6,8 +6,6 @@ import {
   Agenda,
   LocaleConfig,
 } from "react-native-calendars";
-import Icons from "react-native-vector-icons/Ionicons";
-import { Platform } from "react-native-web";
 import { useIsFocused } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedDate } from "../../redux/slice/myPetSlice";
@@ -193,16 +191,6 @@ const CustomCalender = () => {
         }}
         // Hide month navigation arrows. Default = false
         // hideArrows={false}
-        // Replace default arrows with custom ones (direction can be 'left' or 'right')
-        renderArrow={(direction) => {
-          if (direction == "left") {
-            return <Icons name="chevron-back-outline" size={24} color="#000" />;
-          } else if (direction == "right") {
-            return (
-              <Icons name="chevron-forward-outline" size={24} color="#000" />
-            );
-          }
-        }}
         // Do not show days of other months in month page. Default = false
         hideExtraDays={true}
         // If hideArrows = false and hideExtraDays = false do not switch month when tapping on greyed out
@@ -226,7 +214,6 @@ const CustomCalender = () => {
         disableAllTouchEventsForDisabledDays={true}
         // Replace default month and year title with custom one. the function receive a date as parameter
         renderHeader={(date) => {
-          const index = Platform.OS === "android" ? 1 : 0;
           return (
             <View style={{ flexDirection: "row" }}>
               <Text

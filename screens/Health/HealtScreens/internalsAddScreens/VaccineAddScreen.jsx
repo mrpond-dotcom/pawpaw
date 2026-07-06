@@ -8,7 +8,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { addAVaccine } from "../../../../database/tables/vaccine";
 import { addAnActivity } from "../../../../database/tables/activities";
 import moment from "moment";
-import { schedulePushNotification } from "../../../../utils/notifications";
+// import { schedulePushNotification } from "../../../../utils/notifications";
 
 const VaccineAddScreen = ({ navigation }) => {
   const currentPetId = useSelector((state) => state.myPet.currentPetId);
@@ -53,12 +53,12 @@ const VaccineAddScreen = ({ navigation }) => {
         addAnActivity(currentPetId, vetActivityData)
           .then((res) => {
             navigation.navigate("VaccineHistory");
-            schedulePushNotification(
-              `${petName} has a Vaccine`,
-              `Pssttt ${name} Vaccine is now...`,
-              datui,
-              time
-            );
+            // schedulePushNotification(
+            //   `${petName} has a Vaccine`,
+            //   `Pssttt ${name} Vaccine is now...`,
+            //   datui,
+            //   time
+            // );
           })
           .catch((err) => {
             console.log(err);

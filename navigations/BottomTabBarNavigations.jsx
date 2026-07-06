@@ -17,6 +17,8 @@ import CustomTabBar from "../components/ui/CustomTabBar/CustomTabBar";
 const Tab = createBottomTabNavigator();
 
 const BottomTabBarNavigations = ({ navigation }) => {
+  const [showPetSwitcher, setShowPetSwitcher] = React.useState(false);
+
   // const currentPetId = useSelector((state) => state.myPet.currentPetId);
 
   // if(currentPetId === null) {
@@ -40,7 +42,7 @@ const BottomTabBarNavigations = ({ navigation }) => {
       <Tab.Screen
         name="My Pet"
         component={Mypet}
-        options={({ navigation }) => ({
+        options={({ navigation, route }) => ({
           headerStyle: {
             shadowColor: "transparent", // this covers iOS
             elevation: 0, // this covers Android
@@ -49,7 +51,7 @@ const BottomTabBarNavigations = ({ navigation }) => {
           headerTitleStyle: {
             display: "none",
           },
-          headerLeft: () => <CustomMainHeaderLeft isNameVisible={true} />,
+          headerLeft: () => <CustomMainHeaderLeft isNameVisible={true} onShowPetSwitcher={() => route.params?.setShowPetSwitcher?.(true)} />,
           headerRight: () => <CustomMainHeaderRight navigation={navigation} />,
         })}
       />
@@ -67,22 +69,13 @@ const BottomTabBarNavigations = ({ navigation }) => {
         }}
         component={HealtNavigations}
       />
-      <Tab.Screen
-        name="Menu"
-        component={Menu}
-        options={({ navigation }) => ({
-          headerStyle: {
-            shadowColor: "transparent", // this covers iOS
-            elevation: 0, // this covers Android
-            height: 120,
-          },
-          headerTitleStyle: {
-            display: "none",
-          },
-          headerLeft: () => <CustomMainHeaderLeft isNameVisible={true} />,
-          headerRight: () => <CustomMainHeaderRight navigation={navigation} />,
-        })}
-      />
+       <Tab.Screen
+         name="Menu"
+         component={Menu}
+         options={{
+           headerShown: false,
+         }}
+       />
     </Tab.Navigator>
   );
 };

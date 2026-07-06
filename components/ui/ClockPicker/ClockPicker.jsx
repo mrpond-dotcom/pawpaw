@@ -5,64 +5,77 @@ import {
   Modal,
   Pressable,
   TextInput,
+  Platform,
 } from "react-native";
-import Icons from "react-native-vector-icons/Ionicons";
 import React, { useState } from "react";
 import Button from "../Button/Button";
-import DatePicker from "react-native-modern-datepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import moment from "moment";
 
 const ClockPicker = ({ placeHolder, buttonPlaceHolder, onChange }) => {
-  const [time, setTime] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+
+  const handleTimeChange = (event, date) => {
+    if (date) {
+      setSelectedTime(date);
+      if (Platform.OS === "android") {
+        const formattedTime = moment(date).format("HH:mm");
+        onChange(formattedTime);
+        setShowPicker(false);
+      }
+    }
+  };
+
+  const handleDismiss = () => {
+    setShowPicker(false);
+  };
+
+  const handleConfirm = () => {
+    const formattedTime = moment(selectedTime).format("HH:mm");
+    onChange(formattedTime);
+    setShowPicker(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <Pressable style={styles.input} onPress={() => setModalVisible(true)}>
+        <Pressable style={styles.input} onPress={() => setShowPicker(true)}>
           <Text style={styles.inputText}>
-            {time === "" ? placeHolder : time}
+            {selectedTime ? moment(selectedTime).format("HH:mm") : placeHolder}
           </Text>
-          <Icons name="time-outline" size={24} color="#7D7D7D" />
+          <Text style={styles.timeIcon}>⏰</Text>
         </Pressable>
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
-        style={styles.centeredView}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={styles.datePickerContainer}>
-              <DatePicker
-                mode="time"
-                minuteInterval={3}
-                onTimeChange={(selectedTime) => {
-                  setTime(selectedTime);
-                  setModalVisible(!modalVisible);
-                  onChange(selectedTime);
-                }}
-                options={{
-                  textDefaultColor: "#000000",
-                  selectedTextColor: "#FFFFFF",
-                  mainColor: "#707BFB",
-                }}
-                style={{ borderRadius: 10 }}
-              />
+      {showPicker && (
+        <>
+          <DateTimePicker
+            value={selectedTime}
+            mode="time"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={handleTimeChange}
+            onDismiss={handleDismiss}
+          />
+          {Platform.OS === "ios" && (
+            <View style={styles.iosButtonContainer}>
+              <Pressable
+                style={[styles.button, styles.buttonCancel]}
+                onPress={() => setShowPicker(false)}
+              >
+                <Text style={styles.textStyle}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={handleConfirm}
+              >
+                <Text style={styles.textStyle}>
+                  {buttonPlaceHolder || "Confirm"}
+                </Text>
+              </Pressable>
             </View>
-
-            {/* <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={styles.textStyle}>{buttonPlaceHolder}</Text>
-            </Pressable> */}
-          </View>
-        </View>
-      </Modal>
+          )}
+        </>
+      )}
     </View>
   );
 };
@@ -122,23 +135,36 @@ const styles = StyleSheet.create({
     width: 230,
     height: 230,
   },
+  iosButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
   button: {
     borderRadius: 8,
     padding: 10,
     elevation: 2,
+    flex: 1,
+    marginHorizontal: 5,
   },
   buttonOpen: {
     backgroundColor: "#F194FF",
   },
+  buttonCancel: {
+    backgroundColor: "#999999",
+  },
   buttonClose: {
     backgroundColor: "#707BFB",
     borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
   },
   textStyle: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  timeIcon: {
+    fontSize: 24,
   },
 });

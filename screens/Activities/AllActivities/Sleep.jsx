@@ -8,7 +8,7 @@ import Button from "../../../components/ui/Button/Button";
 import MultiLineInput from "../../../components/ui/MultilineInput/MultiLineInput";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSelector } from "react-redux";
-import { schedulePushNotification } from "../../../utils/notifications";
+// import { schedulePushNotification } from "../../../utils/notifications";
 import { addAnActivity } from "../../../database/tables/activities";
 
 const Sleep = ({ navigation }) => {
@@ -63,12 +63,12 @@ const Sleep = ({ navigation }) => {
     addAnActivity(currentPetId, sleepActivity)
       .then(() => {
         navigation.navigate("ActivitiesMain");
-        schedulePushNotification(
-          `${petName} has a Sleep Activity`,
-          `Pssttt ${petName} has a sleep activity now...`,
-          datui,
-          bedTime
-        );
+        // schedulePushNotification(
+        //   `${petName} has a Sleep Activity`,
+        //   `Pssttt ${petName} has a sleep activity now...`,
+        //   datui,
+        //   bedTime
+        // );
       })
       .catch((err) => {
         console.log(err);
